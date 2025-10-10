@@ -16,6 +16,7 @@ void _daemon_signal_handler(int sig);
 void* _daemon_worker_loop(void* arg);
 int _check_pid();
 void _daemonize();
+void* _daemon_job_worker(void* arg);
 
 int daemon_create(const char* pid_file) {
 	memset(g_daemon.pid_file, 0, sizeof(g_daemon.pid_file));
@@ -38,6 +39,8 @@ int daemon_create(const char* pid_file) {
 	g_daemon.log = log_create();
 	g_daemon.net = net_create();
 	g_daemon.ci = ci_create();
+
+	pthread_create(&g_daemon.job_worker_id, NULL, _daemon_job_worker, NULL);
 	
 	// Run worker
 	for(int i = 0; i < WORKER_MAX; i++) {
@@ -49,6 +52,7 @@ int daemon_create(const char* pid_file) {
 		}
 		logging(LL_DBG, MM, "Create worker[%d]\n", i);
 	}
+
 	return 0;
 }
 
@@ -71,6 +75,8 @@ void daemon_free() {
 	que_free(g_daemon.job_que);
 	net_free(g_daemon.net);
 	ci_free(g_daemon.ci);
+
+	pthread_join(g_daemon.job_worker_id, NULL);
 
 	// Clear pid
 	if(g_daemon.pid_fd >= 0) {
@@ -189,4 +195,22 @@ void _daemonize() {
 		if(write(g_daemon.pid_fd, buf, len) != len)
 			exit(EXIT_FAILURE);
 	}
+}
+
+void* _daemon_job_worker(void* arg) {
+	(void)arg;
+
+	logging(LL_INFO, MM, "Running job worker\n");
+	while(g_daemon.is_running) {
+		packet_t* pkt = que_deque(g_daemon.net->recv_que);
+		if(pkt == NULL)
+			break;
+		else {
+			// TODO
+			// unpack hdr
+		}
+	}
+
+	logging(LL_INFO, MM, "Close job worker\n");
+	return NULL;
 }

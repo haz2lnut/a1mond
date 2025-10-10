@@ -15,6 +15,7 @@ typedef struct {
 	bool			is_running;
 	pthread_t worker[WORKER_MAX];
 	queue_t*	job_que;
+	pthread_t job_worker_id;
 
 	// Modules
 	network_t*						net;
