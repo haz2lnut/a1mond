@@ -77,6 +77,10 @@ void daemon_free() {
 	}
 	if(*g_daemon.pid_file)
 		unlink(g_daemon.pid_file);
+
+	logging(LL_INFO, MM, "Godbye\n");
+	log_free(g_daemon.log);
+	_exit(0);
 }
 
 void push_job(void* (*func)(void*), void* arg) {

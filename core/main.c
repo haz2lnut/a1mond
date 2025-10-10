@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "daemon.h"
 
 #include <unistd.h>
@@ -9,8 +8,6 @@ int main() {
 	if(daemon_create(PID_FILENAME))
 		return 1;
 
-	printf("Hello world!!\n");
-
-	while(g_daemon.is_running);
+	while(1) pause();
 	return 0;
 }

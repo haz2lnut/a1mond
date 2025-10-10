@@ -68,8 +68,7 @@ void* _ci_worker(void* arg) {
 			write(sock, "ok\0", 3);
 
 			if(strcmp(buf, "shutdown") == 0) {
-				daemon_free();
-				break;
+				kill(getpid(), SIGINT);
 			}
 
 			memset(buf, 0, BUF_SIZE);
