@@ -3,6 +3,9 @@
 #include <arpa/inet.h>
 #include "daemon.h"
 #include <stdio.h>
+#include "log.h"
+
+static const char* MM = "NET";
 
 void* _net_worker(void* arg);
 
@@ -51,7 +54,7 @@ void* _net_worker(void* arg) {
 	char buf[1024];
 	char ancillary[64];
 
-	printf("Running net worker\n");
+	logging(LL_INFO, MM, "Running net worker\n");
 	while(g_daemon.is_running) {
 		struct msghdr msg;
 		struct sockaddr_in client;
@@ -81,13 +84,13 @@ void* _net_worker(void* arg) {
 							data
 							);
 					que_enque(self->recv_que, pkt);
-					printf("Received %d\n", len);
+					logging(LL_DBG, MM, "Received %d\n", len);
 					break;
 				}
 			}
 		}
 	}
 
-	printf("Close net worker\n");
+	logging(LL_INFO, MM, "Close net worker\n");
 	return NULL;
 }

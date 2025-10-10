@@ -6,9 +6,12 @@
 #include <string.h>
 #include "daemon.h"
 #include <stdio.h>
+#include <signal.h>
+#include "log.h"
 
 #define SOCK_PATH "/tmp/almond.sock"
 #define BUF_SIZE 1024
+static const char* MM = "CI";
 
 void* _ci_worker(void* arg);
 
@@ -56,7 +59,7 @@ void* _ci_worker(void* arg) {
 	int sock;
 	char buf[BUF_SIZE];
 
-	printf("Running ci worker\n");
+	logging(LL_INFO, MM, "Running ci worker\n");
 	while(g_daemon.is_running) {
 		sock = accept(self->sock, NULL, NULL);
 		if(sock < 0) {
@@ -64,7 +67,7 @@ void* _ci_worker(void* arg) {
 		}
 		int len = read(sock, buf, BUF_SIZE - 1);
 		if(len > 0) {
-			printf("Received %d\n", len);
+			logging(LL_DBG, MM, "Received %d\n", len);
 			write(sock, "ok\0", 3);
 
 			if(strcmp(buf, "shutdown") == 0) {
@@ -76,7 +79,7 @@ void* _ci_worker(void* arg) {
 		close(sock);
 	}
 
-	printf("Close ci worker\n");
+	logging(LL_INFO, MM, "Close ci worker\n");
 	unlink(SOCK_PATH);
 	return NULL;
 }

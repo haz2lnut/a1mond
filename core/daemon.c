@@ -10,6 +10,8 @@
 
 daemon_t g_daemon;
 
+static const char* MM = "DMN";
+
 void _daemon_signal_handler(int sig);
 void* _daemon_worker_loop(void* arg);
 int _check_pid();
@@ -45,7 +47,7 @@ int daemon_create(const char* pid_file) {
 			daemon_free();
 			break;
 		}
-		printf("Create worker[%d]\n", i);
+		logging(LL_DBG, MM, "Create worker[%d]\n", i);
 	}
 	return 0;
 }
@@ -56,7 +58,7 @@ void daemon_free() {
 	// Close worker
 	for(int i = 0; i < WORKER_MAX; i++) {
 		if(!que_enque(g_daemon.job_que, NULL)) {
-			// Fail
+			logging(LL_ERR, MM, "Failed close worker[%d]\n", i);
 			return;
 		}
 	}
@@ -96,6 +98,7 @@ void push_job(void* (*func)(void*), void* arg) {
 void _daemon_signal_handler(int sig) {
 	switch(sig) {
 		case SIGINT:
+			logging(LL_DBG, MM, "Received SIGINT");
 			daemon_free();
 			break;
 	}
@@ -115,7 +118,7 @@ void* _daemon_worker_loop(void* arg) {
 		}
 	}
 
-	printf("Close worker[%d]\n", id);
+	logging(LL_DBG, MM, "Close worker[%d]\n", id);
 	return NULL;
 }
 
