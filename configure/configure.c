@@ -16,7 +16,7 @@ cfg_opt_t peer_opts[] = {
 };
 
 cfg_opt_t log_opts[] = {
-	CFG_STR("type", "stdout", CFGF_NONE),
+	CFG_STR("type", "syslog", CFGF_NONE),
 	CFG_STR("level", "all", CFGF_NONE),
 	CFG_END()
 };

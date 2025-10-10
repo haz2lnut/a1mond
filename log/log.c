@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "daemon.h"
 #include <string.h>
+#include <syslog.h>
 
 log_t* log_create() {
 	log_t* self = calloc(1, sizeof(log_t));
@@ -13,6 +14,9 @@ log_t* log_create() {
 		case LT_STD:
 			self->out = stdout;
 			break;
+		case LT_SYSLOG:
+			openlog("a1mond", LOG_PID, LOG_DAEMON);
+			break;
 		default:
 			self->out = stdout;
 			break;
@@ -22,6 +26,9 @@ log_t* log_create() {
 }
 
 void log_free(log_t* self) {
+	if(self->type == LT_SYSLOG) {
+		closelog();
+	}
 	pthread_mutex_destroy(&self->mutex);
 	free(self);
 }
@@ -35,9 +42,16 @@ void logging(LOG_LEVEL level, const char* module, const char* fmt, ...) {
 	va_start(args, fmt);
 
 	pthread_mutex_lock(&self->mutex);
-	fprintf(self->out, "[%s] ", module);
-	vfprintf(self->out, fmt, args);
-	fprintf(self->out, "\n");
+	if(self->type == LT_STD) {
+		fprintf(self->out, "[%s] ", module);
+		vfprintf(self->out, fmt, args);
+		fprintf(self->out, "\n");
+	}
+	else if(self->type == LT_SYSLOG) {
+		char buf[1024];
+		vsnprintf(buf, 1024, fmt, args);
+		syslog(level, "[%s] %s", module, buf);
+	}
 	pthread_mutex_unlock(&self->mutex);
 
 	va_end(args);
