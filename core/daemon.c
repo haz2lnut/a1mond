@@ -1,4 +1,6 @@
 #include "daemon.h"
+#include "exchange.h"
+
 #include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -30,6 +32,8 @@ int daemon_create(const char* pid_file) {
 
 	g_daemon.is_running = true;
 	g_daemon.job_que = que_create(true);
+	memset(g_daemon.sdb, SDB_MAX, sizeof(sa_t));
+	g_daemon.sdb_len = 0;
 
 	// Signal
 	signal(SIGINT, _daemon_signal_handler);
@@ -208,6 +212,15 @@ void* _daemon_job_worker(void* arg) {
 		else {
 			// TODO
 			// unpack hdr
+			exchange_t* exg = exg_create(pkt->data);
+			exg_unpack_hdr(exg);
+
+			// find sa
+			for(int i = 0; i < g_daemon.sdb_len; i++) {
+				sa_t* cur = g_daemon.sdb[i];
+				if(cur->local.ip == pkt->dst ) {
+				}
+			}
 		}
 	}
 

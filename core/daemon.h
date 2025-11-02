@@ -6,8 +6,10 @@
 #include "command_interface.h"
 #include "log.h"
 #include "configure.h"
+#include "sa.h"
 
 #define WORKER_MAX 10
+#define SDB_MAX 10
 
 typedef struct {
 	int				pid_fd;
@@ -22,6 +24,9 @@ typedef struct {
 	command_interface_t*	ci;
 	log_t*								log;
 	configure_t*					cnf;
+
+	sa_t*									sdb[SDB_MAX];
+	int										sdb_len;
 }daemon_t;
 
 typedef struct {
